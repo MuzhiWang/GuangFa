@@ -39,7 +39,7 @@ public final class Utils {
         return ".";
     }
 
-    public static void copyDocument(String oldPath, String newPath) throws Exception {
+    public static void copyFile(String oldPath, String newPath) throws Exception {
         if (Utils.checkStrIsNullOrEmpty(oldPath) || Utils.checkStrIsNullOrEmpty(newPath)) {
             throw new Exception("path should not be empty");
         }
@@ -62,10 +62,14 @@ public final class Utils {
     }
 
     public static void createWholePathIfNotExist(String pathStr) {
-        Path path = FileSystems.getDefault().getPath(pathStr);
-        if (Files.notExists(path)) {
+        if (Utils.pathExist(pathStr)) {
             File folder = new File(pathStr);
             folder.mkdirs();
         }
+    }
+
+    public static boolean pathExist(String pathStr) {
+        Path path = FileSystems.getDefault().getPath(pathStr);
+        return Files.notExists(path);
     }
 }

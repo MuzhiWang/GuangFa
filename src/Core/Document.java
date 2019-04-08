@@ -29,6 +29,14 @@ public class Document {
 		this.documents.put(document.name, document);
 	}
 
+	public Document getDocument(String name) {
+		if (!this.documents.containsKey(name)) {
+			return null;
+		}
+
+		return this.documents.get(name);
+	}
+
 	public void removeDocument(String fileName) throws Exception {
 		if (!this.documents.containsKey(fileName)) {
 			throw new Exception("document doesn't exist");
