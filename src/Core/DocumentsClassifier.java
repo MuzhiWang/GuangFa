@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * Created by muwang on 4/5/2019.
  */
-public class FilesClassifier {
+public class DocumentsClassifier {
 
     public static void classify(List<File> files, String targetFolder) throws Exception {
         if (Utils.checkStrIsNullOrEmpty(targetFolder)) {

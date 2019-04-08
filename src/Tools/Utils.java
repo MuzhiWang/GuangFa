@@ -1,7 +1,8 @@
 package Tools;
 
-import Core.File;
+import Core.Document;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.nio.file.FileSystems;
@@ -15,21 +16,21 @@ import java.util.stream.Collectors;
  * Created by muwang on 4/4/2019.
  */
 public final class Utils {
-    public static List<File> getAllFiles() {
+    public static List<Document> getAllDocuments() {
         String path = Utils.getCurrentPath();
-        java.io.File curDir = new java.io.File(path);
-        List<java.io.File> allFiles = Utils.getFiles(curDir);
+        java.io.File curDir = new File(path);
+        List<File> allFiles = Utils.getDocuments(curDir);
 
-        return allFiles.stream().map(x -> new File(x.getName(), x.getPath())).collect(Collectors.toList());
+        return allFiles.stream().map(x -> new Document(x.getName(), x.getPath())).collect(Collectors.toList());
     }
 
-    private static List<java.io.File> getFiles(java.io.File curDir) {
-        java.io.File[] filesList = curDir.listFiles();
-        List<java.io.File> res = new ArrayList<>();
+    private static List<File> getDocuments(File curDir) {
+        File[] filesList = curDir.listFiles();
+        List<File> res = new ArrayList<>();
 
-        for (java.io.File file : filesList) {
+        for (File file : filesList) {
             if (file.isDirectory()) {
-                res.addAll(Utils.getFiles(file));
+                res.addAll(Utils.getDocuments(file));
             } else {
                 res.add(file);
             }
@@ -42,7 +43,7 @@ public final class Utils {
         return ".";
     }
 
-    public static void copyFile(String oldPath, String newPath) throws Exception {
+    public static void copyDocument(String oldPath, String newPath) throws Exception {
         if (Utils.checkStrIsNullOrEmpty(oldPath) || Utils.checkStrIsNullOrEmpty(newPath)) {
             throw new Exception("path should not be empty");
         }
@@ -67,7 +68,7 @@ public final class Utils {
     public static void createWholePathIfNotExist(String pathStr) {
         Path path = FileSystems.getDefault().getPath(pathStr);
         if (Files.notExists(path)) {
-            java.io.File folder = new java.io.File(pathStr);
+            File folder = new File(pathStr);
             folder.mkdirs();
         }
     }

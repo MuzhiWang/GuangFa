@@ -1,10 +1,10 @@
 package Core;
 
-public class File {
+public class Document {
 	public String fileName;
 	public String path;
 	
-	public File(String fileName, String path) {
+	public Document(String fileName, String path) {
 		this.fileName = fileName;
 		this.path = path;
 	}
@@ -12,9 +12,9 @@ public class File {
 	@Override
 	public boolean equals(Object other) {
 		if (other == this) return true;
-		if (!(other instanceof File)) return false;
+		if (!(other instanceof Document)) return false;
 		
-		File file = (File) other;
+		Document file = (Document) other;
 		
 		return file.path.equals(this.path) && file.fileName.equals(this.fileName);
 	}

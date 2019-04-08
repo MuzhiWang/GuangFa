@@ -3,23 +3,23 @@ package Core;
 import java.util.*;
 
 public class Folder {
-	private Set<File> files;
+	private Set<Document> documents;
 	private Map<String, Folder> subFolders;
 	
 	public String name;
 	
 	public Folder(String name) {
-		this.files = new HashSet<>();
+		this.documents = new HashSet<>();
 		this.subFolders = new HashMap<>();
 		this.name = name;
 	}
 	
-	public void addFile(File file) throws Exception {
-		if (this.files.contains(file)) {
-			throw new Exception("file exist");
+	public void addDocument(Document file) throws Exception {
+		if (this.documents.contains(file)) {
+			throw new Exception("document exist");
 		}
 		
-		this.files.add(file);
+		this.documents.add(file);
 	}
 	
 	public void addSubFolder(Folder subFolder) throws Exception {
@@ -30,18 +30,18 @@ public class Folder {
 		this.subFolders.put(subFolder.name, subFolder);
 	}
 
-	public List<File> getFiles() {
-		List<File> list = new ArrayList<File>(this.files);
-		Collections.sort(list, new Comparator<File>() {
-			public int compare(File f1, File f2) {
+	public List<Document> getDocuments() {
+		List<Document> list = new ArrayList<Document>(this.documents);
+		Collections.sort(list, new Comparator<Document>() {
+			public int compare(Document f1, Document f2) {
 				return f1.fileName.compareTo(f2.fileName);
 			}
 		});
 		return list;
 	}
 
-	public boolean existFile(String name) {
-		return this.files.contains(name);
+	public boolean existDocument(String name) {
+		return this.documents.contains(name);
 	}
 
 	public List<Folder> getSubFolders() {
