@@ -1,7 +1,5 @@
 package Tools;
 
-import Core.Document;
-
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -16,21 +14,19 @@ import java.util.stream.Collectors;
  * Created by muwang on 4/4/2019.
  */
 public final class Utils {
-    public static List<Document> getAllDocuments() {
+    public static List<File> getAllFiles() {
         String path = Utils.getCurrentPath();
-        java.io.File curDir = new File(path);
-        List<File> allFiles = Utils.getDocuments(curDir);
-
-        return allFiles.stream().map(x -> new Document(x.getName(), x.getPath())).collect(Collectors.toList());
+        File curDir = new File(path);
+        return Utils.getFiles(curDir);
     }
 
-    private static List<File> getDocuments(File curDir) {
+    private static List<File> getFiles(File curDir) {
         File[] filesList = curDir.listFiles();
         List<File> res = new ArrayList<>();
 
         for (File file : filesList) {
             if (file.isDirectory()) {
-                res.addAll(Utils.getDocuments(file));
+                res.addAll(Utils.getFiles(file));
             } else {
                 res.add(file);
             }
