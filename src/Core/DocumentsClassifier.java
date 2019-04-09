@@ -8,6 +8,8 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -45,7 +47,7 @@ public class DocumentsClassifier {
             boolean pathExist = true;
             StringBuilder pathSB = new StringBuilder(this.targetFolder.getPath());
             int i = 0;
-            for (; i < filePaths.length - 1; ++i) {
+            for (; i < filePaths.length - 2; ++i) {
                 String curFolderName = filePaths[i];
                 pathSB.append("\\" + curFolderName);
 
@@ -66,7 +68,8 @@ public class DocumentsClassifier {
             }
 
             String curFileName = filePaths[i];
-            pathSB.append("\\" + curFileName);
+            pathSB.append("\\" + curFileName + "." + filePaths[++i]);
+
             // Same folder name in cur directory.
             if (cur.existSubFolder(curFileName)) {
 
@@ -89,14 +92,20 @@ public class DocumentsClassifier {
         return this.root;
     }
 
+    /*
+    * Based on file name's format, such as "1_2_3_4.pdf",
+    * we want to get file path as {"1", "2", "3", "4", "pdf"}, the "4" should be the file name.
+    * */
     protected static String[] getFilePath(File file) throws Exception {
-        String fileName = file.getAbsolutePath();
-        String[] fileNameStrs = fileName.split(FileSettings.FILE_EXT_FORMAT);
-        if (DocumentsClassifier.checkFileName(fileNameStrs)) {
+        String fileName = file.getName();
+        String[] fileNameStrs = fileName.split("\\.");
+        if (!DocumentsClassifier.checkFileName(fileNameStrs)) {
             throw new Exception("invalid file names");
         }
 
-        return fileNameStrs[0].split(FileSettings.FILE_FORMAT_SPLITTER);
+        List<String> strs = new ArrayList<>(Arrays.asList(fileNameStrs[0].split(FileSettings.FILE_FORMAT_SPLITTER)));
+        strs.add(fileNameStrs[fileNameStrs.length - 1]);
+        return strs.toArray(new String[strs.size()]);
     }
 
     private static boolean checkFileName(String[] fileNameStrs) {

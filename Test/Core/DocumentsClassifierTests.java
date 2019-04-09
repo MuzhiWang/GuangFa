@@ -27,6 +27,12 @@ public class DocumentsClassifierTests {
     }
 
     @Test
+    public void filePathRegExTest() {
+        String fileName = "1_2_3_4.txt";
+        String[] strs = fileName.split("(?i)\\.");
+    }
+
+    @Test
     public void getFilePathTest() throws Exception {
         String testPath = FileSettings.DIRECTORY_PATH + "\\PathTest";
         Utils.createWholePathIfNotExist(testPath);

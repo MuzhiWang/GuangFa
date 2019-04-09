@@ -10,5 +10,5 @@ public final class FileSettings {
 
     public final static String DIRECTORY_PATH = "E:\\Muzhi\\Test";
 
-    public final static String FILE_EXT_FORMAT = "\\.(?i)(pdf|txt)";
+    public final static String FILE_EXT_FORMAT = "(?i).\\(pdf|txt)";
 }
