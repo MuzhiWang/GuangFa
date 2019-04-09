@@ -14,8 +14,12 @@ import java.util.stream.Collectors;
  * Created by muwang on 4/4/2019.
  */
 public final class Utils {
-    public static List<File> getAllFiles() {
+    public static List<File> getAllFilesInCurrentDirectory() {
         String path = Utils.getCurrentPath();
+        return Utils.getAllFiles(path);
+    }
+
+    public static List<File> getAllFiles(String path) {
         File curDir = new File(path);
         return Utils.getFiles(curDir);
     }
@@ -44,6 +48,8 @@ public final class Utils {
             throw new Exception("path should not be empty");
         }
 
+        Utils.createWholePathIfNotExist(Utils.getFilePath(newPath));
+
         try {
             FileInputStream is = new FileInputStream(oldPath);
             FileOutputStream os = new FileOutputStream(newPath);
@@ -52,7 +58,11 @@ public final class Utils {
             while ((b = is.read()) != -1) {
                 os.write(b);
             }
+
+            is.close();
+            os.close();
         } catch (Exception e) {
+            System.out.printf("Copy failed. Old path: %s, new path: %s", oldPath, newPath);
             throw e;
         }
     }
@@ -71,5 +81,26 @@ public final class Utils {
     public static boolean pathExist(String pathStr) {
         Path path = FileSystems.getDefault().getPath(pathStr);
         return Files.notExists(path);
+    }
+
+    public static void deleteFolder(String folderPath) throws Exception {
+        Utils.checkStrIsNullOrEmpty(folderPath);
+        File folder = new File(folderPath);
+        if (folder.exists()) {
+            for (File file : folder.listFiles()) {
+                if (file.isDirectory()) {
+                    Utils.deleteFolder(file.getAbsolutePath());
+                } else {
+                    file.delete();
+                }
+            }
+        }
+        folder.delete();
+
+    }
+
+    private static String getFilePath(String absolutePath) {
+        int idx = absolutePath.lastIndexOf('\\');
+        return absolutePath.substring(0, idx);
     }
 }

@@ -7,4 +7,8 @@ public final class FileSettings {
     public final static String FILE_FORMAT = "1_2_3_4_5_6_7_8_9_10";
 
     public final static String FILE_FORMAT_SPLITTER = "_";
+
+    public final static String DIRECTORY_PATH = "E:\\Muzhi\\Test";
+
+    public final static String FILE_EXT_FORMAT = "\\.(?i)(pdf|txt)";
 }

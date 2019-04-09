@@ -25,7 +25,7 @@ public class DocumentsClassifier {
 
         Utils.createWholePathIfNotExist(targetFolder);
         this.targetFolder = new File(targetFolder);
-        this.root = new Document(this.targetFolder.getName(), this.targetFolder.getPath(), true);
+        this.reset();
     }
 
     /*
@@ -40,14 +40,14 @@ public class DocumentsClassifier {
     * */
     public void classify(List<File> files) throws Exception {
         for (File file : files) {
-            String[] filePaths = this.getFilePath(file);
+            String[] filePaths = DocumentsClassifier.getFilePath(file);
             Document cur = this.root;
             boolean pathExist = true;
             StringBuilder pathSB = new StringBuilder(this.targetFolder.getPath());
             int i = 0;
             for (; i < filePaths.length - 1; ++i) {
                 String curFolderName = filePaths[i];
-                pathSB.append("/" + curFolderName);
+                pathSB.append("\\" + curFolderName);
 
                 // No scenario cur folder will be file.
                 if (!cur.isFolder) {
@@ -66,7 +66,7 @@ public class DocumentsClassifier {
             }
 
             String curFileName = filePaths[i];
-            pathSB.append("/" + curFileName);
+            pathSB.append("\\" + curFileName);
             // Same folder name in cur directory.
             if (cur.existSubFolder(curFileName)) {
 
@@ -81,17 +81,25 @@ public class DocumentsClassifier {
         }
     }
 
-    private String[] getFilePath(File file) throws Exception {
-        String fileName = file.getName();
-        String[] fileNameStrs = fileName.split("(?i)\\.pdf");
-        if (this.checkFileName(fileNameStrs)) {
+    public void reset() {
+        this.root = new Document(this.targetFolder.getName(), this.targetFolder.getPath(), true);
+    }
+
+    public Document getRoot() {
+        return this.root;
+    }
+
+    protected static String[] getFilePath(File file) throws Exception {
+        String fileName = file.getAbsolutePath();
+        String[] fileNameStrs = fileName.split(FileSettings.FILE_EXT_FORMAT);
+        if (DocumentsClassifier.checkFileName(fileNameStrs)) {
             throw new Exception("invalid file names");
         }
 
         return fileNameStrs[0].split(FileSettings.FILE_FORMAT_SPLITTER);
     }
 
-    private boolean checkFileName(String[] fileNameStrs) {
+    private static boolean checkFileName(String[] fileNameStrs) {
         if (fileNameStrs == null || fileNameStrs.length < 2) {
             return false;
         }
