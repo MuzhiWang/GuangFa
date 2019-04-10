@@ -1,10 +1,13 @@
 package Core;
 
+import Tools.Utils;
+
 import java.io.File;
 import java.util.*;
 
 public class Document {
-	private Map<String, Document> documents;
+	private Map<String, Document> folders;
+	private Map<String, Map<String, Document>> files;
 	
 	public String name;
 	public String path;
@@ -17,36 +20,54 @@ public class Document {
 		this.isFolder = isFolder;
 		this.file = new File(path);
 		if (isFolder) {
-			this.documents = new HashMap<>();
+			this.folders = new HashMap<>();
+			this.files = new HashMap<>();
 		}
 	}
 	
-	public void addDocument(Document document) throws Exception {
-		if (this.documents.containsKey(document.name)) {
-			throw new Exception("document exist");
+	public boolean addFolder(Document document) {
+		if (this.folders.containsKey(document.name)) {
+			return false;
 		}
 		
-		this.documents.put(document.name, document);
+		this.folders.put(document.name, document);
+		return true;
 	}
 
-	public Document getDocument(String name) {
-		if (!this.documents.containsKey(name)) {
+	public boolean addFile(Document file) throws Exception {
+		// The file name should be "4项目清单"
+		String filePath = Utils.queryFilePathInName(file.name);
+		if (!this.files.containsKey(filePath)) {
+			this.files.put(filePath, new HashMap<>());
+		}
+
+		// If same file name exist.
+		if (this.files.get(filePath).containsKey(file.name)) {
+			return false;
+		} else {
+			this.files.get(filePath).put(file.name, file);
+			return true;
+		}
+	}
+
+	public Document getFolder(String name) {
+		if (!this.folders.containsKey(name)) {
 			return null;
 		}
 
-		return this.documents.get(name);
+		return this.folders.get(name);
 	}
 
-	public void removeDocument(String fileName) throws Exception {
-		if (!this.documents.containsKey(fileName)) {
+	public void removeFolder(String folderName) throws Exception {
+		if (!this.folders.containsKey(folderName)) {
 			throw new Exception("document doesn't exist");
 		}
 
-		this.documents.remove(fileName);
+		this.folders.remove(folderName);
 	}
 
-	public List<Document> getDocuments() {
-		List<Document> list = new ArrayList<Document>(this.documents.values());
+	public List<Document> getFolders() {
+		List<Document> list = new ArrayList<Document>(this.folders.values());
 		Collections.sort(list, new Comparator<Document>() {
 			public int compare(Document f1, Document f2) {
 				return f1.name.compareTo(f2.name);
@@ -56,11 +77,12 @@ public class Document {
 	}
 
 	public boolean existFile(String name) {
-		return this.documents.containsKey(name) && !this.documents.get(name).isFolder;
+		String filePath = Utils.queryFilePathInName(name);
+		return this.files.containsKey(filePath) && this.files.get(filePath).contains();
 	}
 
 	public boolean existSubFolder(String name) {
-		return this.documents.containsKey(name) && this.documents.get(name).isFolder;
+		return this.folders.containsKey(name) && this.folders.get(name).isFolder;
 	}
 
 	@Override

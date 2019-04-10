@@ -4,10 +4,6 @@ import Settings.FileSettings;
 import Tools.Utils;
 
 import java.io.File;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -57,9 +53,9 @@ public class DocumentsClassifier {
                 } else {
                     if (!cur.existSubFolder(curFolderName)) {
                         pathExist = false;
-                        cur.addDocument(new Document(curFolderName, pathSB.toString(), true));
+                        cur.addFolder(new Document(curFolderName, pathSB.toString(), true));
                     }
-                    cur = cur.getDocument(curFolderName);
+                    cur = cur.getFolder(curFolderName);
                 }
             }
 
@@ -67,8 +63,12 @@ public class DocumentsClassifier {
                 Utils.createWholePathIfNotExist(pathSB.toString());
             }
 
+            // File name maybe as "4项目规划 表1".
             String curFileName = filePaths[i];
-            pathSB.append("\\" + curFileName + "." + filePaths[++i]);
+            String curFilePathInName = Utils.queryFilePathInName(curFileName);
+            String fileFormat = filePaths[++i];
+
+            pathSB.append("\\" + curFileName + "." + fileFormat);
 
             // Same folder name in cur directory.
             if (cur.existSubFolder(curFileName)) {
@@ -79,7 +79,7 @@ public class DocumentsClassifier {
 
             } else {
                 Utils.copyFile(file.getPath(), pathSB.toString());
-                cur.addDocument(new Document(curFileName, pathSB.toString(), false));
+                cur.addFolder(new Document(curFileName, pathSB.toString(), false));
             }
         }
     }
@@ -93,17 +93,22 @@ public class DocumentsClassifier {
     }
 
     /*
-    * Based on file name's format, such as "1_2_3_4.pdf",
-    * we want to get file path as {"1", "2", "3", "4", "pdf"}, the "4" should be the file name.
+    * Based on file name's format, such as "1_2_3_4项目规划 表1.pdf",
+    * we want to get file path as {"1", "2", "3", "4项目规划 表1", "pdf"}, the "4" should be the file name.
     * */
     protected static String[] getFilePath(File file) throws Exception {
         String fileName = file.getName();
+
+        // Split to {"1_2_3_4项目规划 表1", "pdf"}
         String[] fileNameStrs = fileName.split("\\.");
         if (!DocumentsClassifier.checkFileName(fileNameStrs)) {
             throw new Exception("invalid file names");
         }
 
-        List<String> strs = new ArrayList<>(Arrays.asList(fileNameStrs[0].split(FileSettings.FILE_FORMAT_SPLITTER)));
+        // Split "1_2_3_4项目规划 表1" to {"1", "2", "3", "4项目规划 表1"}
+        String[] fileNameStrsPart1 = fileNameStrs[0].split(FileSettings.FILE_FORMAT_SPLITTER);
+
+        List<String> strs = new ArrayList<>(Arrays.asList(fileNameStrsPart1));
         strs.add(fileNameStrs[fileNameStrs.length - 1]);
         return strs.toArray(new String[strs.size()]);
     }

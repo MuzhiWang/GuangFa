@@ -99,6 +99,23 @@ public final class Utils {
 
     }
 
+    public static boolean isCharDigit(char ch) {
+        return ch - '0' >= 0 && ch - '9' <= 0;
+    }
+
+    // Query "4项目规划 表1" as "4"
+    public static String queryFilePathInName(String fileName) {
+        StringBuilder sb = new StringBuilder();
+        for (char ch : fileName.toCharArray()) {
+            if (Utils.isCharDigit(ch)) {
+                sb.append(ch);
+            } else {
+                break;
+            }
+        }
+        return sb.toString();
+    }
+
     private static String getFilePath(String absolutePath) {
         int idx = absolutePath.lastIndexOf('\\');
         return absolutePath.substring(0, idx);

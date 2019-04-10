@@ -19,7 +19,7 @@ public class DocumentsClassifierTests {
         DocumentsClassifier dc = new DocumentsClassifier(".");
         Document doc = dc.getRoot();
         String folderName = "test";
-        doc.addDocument(new Document(folderName, "/1/2/", true));
+        doc.addFolder(new Document(folderName, "/1/2/", true));
 
         dc.reset();
 
