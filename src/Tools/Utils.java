@@ -67,6 +67,13 @@ public final class Utils {
         }
     }
 
+    public static void moveFile(String oldPath, String newPath) throws Exception {
+        Utils.copyFile(oldPath, newPath);
+
+        File oldFile = new File(oldPath);
+        oldFile.delete();
+    }
+
     public static boolean checkStrIsNullOrEmpty(String str) {
         return str == null || str.isEmpty();
     }

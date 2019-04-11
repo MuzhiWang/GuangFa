@@ -23,7 +23,7 @@ public class DocumentsClassifierTests {
 
         dc.reset();
 
-        Assert.assertFalse(dc.getRoot().existSubFolder(folderName));
+        Assert.assertFalse(dc.getRoot().existFolder(folderName));
     }
 
     @Test

@@ -6,8 +6,8 @@ import java.io.File;
 import java.util.*;
 
 public class Document {
-	private Map<String, Document> folders;
-	private Map<String, Map<String, Document>> files;
+	public Map<String, Document> folders;
+	public Map<String, Map<String, Document>> files;
 	
 	public String name;
 	public String path;
@@ -50,23 +50,44 @@ public class Document {
 		}
 	}
 
-	public Document getFolder(String name) {
-		if (!this.folders.containsKey(name)) {
+	public Document getFolder(String folderName) {
+		if (!this.folders.containsKey(folderName)) {
 			return null;
 		}
 
-		return this.folders.get(name);
+		return this.folders.get(folderName);
+	}
+
+	public Document getFile(String fileName) {
+		String filePath = Utils.queryFilePathInName(fileName);
+		if (!this.files.containsKey(filePath) || !this.files.get(filePath).containsKey(fileName)) {
+			return null;
+		}
+
+		return this.files.get(filePath).get(fileName);
 	}
 
 	public void removeFolder(String folderName) throws Exception {
 		if (!this.folders.containsKey(folderName)) {
-			throw new Exception("document doesn't exist");
+			throw new Exception("folder doesn't exist");
 		}
 
 		this.folders.remove(folderName);
 	}
 
-	public List<Document> getFolders() {
+	public void removeFile(String fileName) throws Exception {
+		String filePath = Utils.queryFilePathInName(fileName);
+		if (!this.files.containsKey(filePath) || !this.files.get(filePath).containsKey(fileName)) {
+			throw new Exception("file doesn't exist");
+		}
+
+		this.files.get(filePath).remove(fileName);
+		if (this.files.get(filePath).isEmpty()) {
+			this.files.remove(filePath);
+		}
+	}
+
+	public List<Document> getAllFolders() {
 		List<Document> list = new ArrayList<Document>(this.folders.values());
 		Collections.sort(list, new Comparator<Document>() {
 			public int compare(Document f1, Document f2) {
@@ -76,13 +97,21 @@ public class Document {
 		return list;
 	}
 
-	public boolean existFile(String name) {
-		String filePath = Utils.queryFilePathInName(name);
-		return this.files.containsKey(filePath) && this.files.get(filePath).contains();
+	public boolean existFile(String fileName) {
+		String filePath = Utils.queryFilePathInName(fileName);
+		return this.files.containsKey(filePath) && this.files.get(filePath).containsKey(fileName);
 	}
 
-	public boolean existSubFolder(String name) {
-		return this.folders.containsKey(name) && this.folders.get(name).isFolder;
+	public boolean existFiles() {
+		return !this.files.isEmpty();
+	}
+
+	public boolean existFolder(String folderName) {
+		return this.folders.containsKey(folderName);
+	}
+
+	public boolean existFolders() {
+		return !this.folders.isEmpty();
 	}
 
 	@Override

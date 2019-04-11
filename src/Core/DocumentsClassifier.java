@@ -38,11 +38,14 @@ public class DocumentsClassifier {
     * */
     public void classify(List<File> files) throws Exception {
         for (File file : files) {
+            // file path as {"1", "2", "3", "4项目规划 表1", "pdf"},
             String[] filePaths = DocumentsClassifier.getFilePath(file);
             Document cur = this.root;
             boolean pathExist = true;
+
             StringBuilder pathSB = new StringBuilder(this.targetFolder.getPath());
             int i = 0;
+
             for (; i < filePaths.length - 2; ++i) {
                 String curFolderName = filePaths[i];
                 pathSB.append("\\" + curFolderName);
@@ -51,7 +54,30 @@ public class DocumentsClassifier {
                 if (!cur.isFolder) {
                     throw new Exception("Cur path must be folder. Please check data");
                 } else {
-                    if (!cur.existSubFolder(curFolderName)) {
+                    // Edge case: if "1-2abc.pdf" exist, but current file is "1-2-3xyz.pdf"
+                    //  1). Rename the "1-2xyc.pdf" -> "1-2xyz====NeedToBeRevised.pdf"
+                    //  2). Move "1-2xyz====NeedToBeRevised.pdf" from "1" folder to "1/2" folder.
+                    //  3). Log and warn.
+                    if (cur.files.containsKey(curFolderName)) {
+                        Utils.createWholePathIfNotExist(pathSB.toString());
+                        cur.addFolder(new Document(curFolderName, pathSB.toString(), true));
+
+                        for (Document existFile : cur.files.get(curFolderName).values()) {
+                            String[] fileNames = existFile.name.split("\\.");
+                            String newName = fileNames[0] + FileSettings.UNCERTERN_FILE_SUFFIX + "." + fileNames[1];
+                            String newPath = pathSB.toString() + "\\" + newName;
+                            Document newFile = new Document(newName, newPath, false);
+
+                            Utils.moveFile(existFile.path, newPath);
+                            cur.getFolder(curFolderName).addFile(newFile);
+
+                            this.warnFileNeedToBeRevised(existFile);
+                        }
+
+                        cur.files.remove(curFolderName);
+                    }
+
+                    if (!cur.existFolder(curFolderName)) {
                         pathExist = false;
                         cur.addFolder(new Document(curFolderName, pathSB.toString(), true));
                     }
@@ -66,12 +92,24 @@ public class DocumentsClassifier {
             // File name maybe as "4项目规划 表1".
             String curFileName = filePaths[i];
             String curFilePathInName = Utils.queryFilePathInName(curFileName);
-            String fileFormat = filePaths[++i];
+            boolean reviseWarn = false;
 
+            // Edge case: if "1-2-3abc.pdf" exist, but current file is "1-2xyz.pdf"
+            //  1). Rename the "1-2xyc.pdf" -> "1-2xyz====NeedToBeRevised.pdf"
+            //  2). Move "1-2xyz====NeedToBeRevised.pdf" to "1/2" folder.
+            //  3). Log and warn.
+            if (cur.existFolder(curFilePathInName)) {
+                curFileName += FileSettings.UNCERTERN_FILE_SUFFIX;
+                cur = cur.getFolder(curFilePathInName);
+                reviseWarn = true;
+            }
+
+            String fileFormat = filePaths[++i];
             pathSB.append("\\" + curFileName + "." + fileFormat);
+            Document newFile = new Document(curFileName, pathSB.toString(), false);
 
             // Same folder name in cur directory.
-            if (cur.existSubFolder(curFileName)) {
+            if (cur.existFolder(curFileName)) {
 
             }
             // Same file name in cur directory.
@@ -79,7 +117,11 @@ public class DocumentsClassifier {
 
             } else {
                 Utils.copyFile(file.getPath(), pathSB.toString());
-                cur.addFolder(new Document(curFileName, pathSB.toString(), false));
+                cur.addFolder(newFile);
+            }
+
+            if (reviseWarn) {
+                this.warnFileNeedToBeRevised(newFile);
             }
         }
     }
@@ -118,5 +160,9 @@ public class DocumentsClassifier {
             return false;
         }
         return true;
+    }
+
+    private void warnFileNeedToBeRevised(Document file) {
+        System.out.printf("\n File need to be revised. File path: %s \n", file.path);
     }
 }
