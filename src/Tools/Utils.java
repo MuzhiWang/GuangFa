@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * Created by muwang on 4/4/2019.
@@ -140,7 +139,7 @@ public final class Utils {
 
     // "1-2-3xyz.pdf" -> "1-2-3xyz-{index}.pdf"
     public static String appendIndex(String fileName, int index) {
-        return Utils.appendStringInFileName(fileName, FileSettings.FILE_FORMAT_SPLITTER + index);
+        return Utils.appendStringInFileName(fileName, FileSettings.FILE_APPEND_INDEX_SPLITTER + index);
     }
 
     private static String getFilePath(String absolutePath) {

@@ -101,9 +101,11 @@ public class DocumentsClassifier {
             //  3). Log and warn.
             if (cur.existFolder(curFilePathInName)) {
                 curFileName = Utils.appendStringInFileName(curFileName, FileSettings.UNCERTERN_FILE_SUFFIX);
+                int samePathFolderCount = cur.getFolder(curFilePathInName).files.size();
+                curFileName = Utils.appendIndex(curFileName, samePathFolderCount);
                 cur = cur.getFolder(curFilePathInName);
 
-                pathSB.append("\\" + curFileName);
+                pathSB.append("\\" + curFilePathInName + "\\" + curFileName);
                 Document newFile = new Document(curFileName, pathSB.toString(), false);
 
                 Utils.copyFile(file.getAbsolutePath(), pathSB.toString());

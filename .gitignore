@@ -1,8 +1,9 @@
 *.class
 *.classpath
 *.project
-./out
 ./.idea/*
 *.xml
 *.iml
 .DS_Store
+Test/UnitTests/*
+out/test/*

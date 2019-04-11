@@ -9,6 +9,8 @@ public final class FileSettings {
 
     public final static String FILE_FORMAT_SPLITTER = "-";
 
+    public final static String FILE_APPEND_INDEX_SPLITTER = "+++";
+
     public final static String DIRECTORY_PATH = "E:\\Muzhi\\Test";
 
     public final static String FILE_EXT_FORMAT = "(?i).(pdf|txt)";
