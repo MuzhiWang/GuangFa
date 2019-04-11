@@ -40,6 +40,7 @@ public class DocumentsClassifier {
         for (File file : files) {
             // file path as {"1", "2", "3", "4项目规划 表1", "pdf"},
             String[] filePaths = DocumentsClassifier.getFilePath(file);
+            String fileFormat = "." + filePaths[filePaths.length - 1];
             Document cur = this.root;
             boolean pathExist = true;
 
@@ -62,16 +63,17 @@ public class DocumentsClassifier {
                         Utils.createWholePathIfNotExist(pathSB.toString());
                         cur.addFolder(new Document(curFolderName, pathSB.toString(), true));
 
+                        int index = 0;
                         for (Document existFile : cur.files.get(curFolderName).values()) {
-                            String[] fileNames = existFile.name.split("\\.");
-                            String newName = fileNames[0] + FileSettings.UNCERTERN_FILE_SUFFIX + "." + fileNames[1];
+                            String newName = Utils.appendStringInFileName(existFile.name, FileSettings.UNCERTERN_FILE_SUFFIX);
+                            newName = Utils.appendIndex(newName, index++);
                             String newPath = pathSB.toString() + "\\" + newName;
                             Document newFile = new Document(newName, newPath, false);
 
                             Utils.moveFile(existFile.path, newPath);
                             cur.getFolder(curFolderName).addFile(newFile);
 
-                            this.warnFileNeedToBeRevised(existFile);
+                            this.warnFileNeedToBeRevised(newFile);
                         }
 
                         cur.files.remove(curFolderName);
@@ -89,39 +91,65 @@ public class DocumentsClassifier {
                 Utils.createWholePathIfNotExist(pathSB.toString());
             }
 
-            // File name maybe as "4项目规划 表1".
-            String curFileName = filePaths[i];
-            String curFilePathInName = Utils.queryFilePathInName(curFileName);
-            boolean reviseWarn = false;
+            // File name maybe as "1-2-3-4项目规划 表1.pdf".
+            String curFileName = file.getName();
+            String curFilePathInName = Utils.getLastFilePathInName(curFileName);
 
             // Edge case: if "1-2-3abc.pdf" exist, but current file is "1-2xyz.pdf"
             //  1). Rename the "1-2xyc.pdf" -> "1-2xyz====NeedToBeRevised.pdf"
             //  2). Move "1-2xyz====NeedToBeRevised.pdf" to "1/2" folder.
             //  3). Log and warn.
             if (cur.existFolder(curFilePathInName)) {
-                curFileName += FileSettings.UNCERTERN_FILE_SUFFIX;
+                curFileName = Utils.appendStringInFileName(curFileName, FileSettings.UNCERTERN_FILE_SUFFIX);
                 cur = cur.getFolder(curFilePathInName);
-                reviseWarn = true;
-            }
 
-            String fileFormat = filePaths[++i];
-            pathSB.append("\\" + curFileName + "." + fileFormat);
-            Document newFile = new Document(curFileName, pathSB.toString(), false);
+                pathSB.append("\\" + curFileName);
+                Document newFile = new Document(curFileName, pathSB.toString(), false);
 
-            // Same folder name in cur directory.
-            if (cur.existFolder(curFileName)) {
+                Utils.copyFile(file.getAbsolutePath(), pathSB.toString());
+                cur.addFile(newFile);
 
-            }
-            // Same file name in cur directory.
-            else if (cur.existFile(curFileName)) {
-
-            } else {
-                Utils.copyFile(file.getPath(), pathSB.toString());
-                cur.addFolder(newFile);
-            }
-
-            if (reviseWarn) {
                 this.warnFileNeedToBeRevised(newFile);
+            }
+            // Edge case: Exist file with same path name in cur folder.
+            // e.g. "1-2-3abc.pdf" && "1-2-3xyc.pdf".
+            //  1). Rename these two files as "1-2-3abc======NeedToBeRevised1.pdf" && "1-2-3xyc======NeedToBeRevised2.pdf".
+            //  2). Move these files into "1/2/3" folder.
+            else if (cur.existFileWithSamePath(curFileName)) {
+                pathSB.append("\\" + curFilePathInName);
+                cur.addFolder(new Document(curFilePathInName, pathSB.toString(), true));
+                Utils.createWholePathIfNotExist(pathSB.toString());
+
+                // Rename and move all exist "1-2-3xxxx.pdf" from "1/2" to "1/2/3"
+                int index = 0;
+                for (Document existFile : cur.files.get(curFilePathInName).values()) {
+                    String newName = Utils.appendStringInFileName(existFile.name, FileSettings.UNCERTERN_FILE_SUFFIX);
+                    newName = Utils.appendIndex(newName, index++);
+                    String newPath = pathSB.toString() + "\\" + newName;
+                    Document newFile = new Document(newName, newPath, false);
+
+                    Utils.moveFile(existFile.path, newPath);
+                    cur.getFolder(curFilePathInName).addFile(newFile);
+
+                    this.warnFileNeedToBeRevised(newFile);
+                }
+                cur.files.remove(curFilePathInName);
+
+                cur = cur.getFolder(curFilePathInName);
+                String newName = Utils.appendStringInFileName(curFileName, FileSettings.UNCERTERN_FILE_SUFFIX);
+                newName = Utils.appendIndex(newName, index);
+                String newPath = pathSB.toString() + "\\" + newName;
+                Document newFile = new Document(curFileName, newPath, false);
+
+                Utils.copyFile(file.getAbsolutePath(), newFile.path);
+                cur.addFile(newFile);
+
+                this.warnFileNeedToBeRevised(newFile);
+            } else {
+                String newPath = pathSB.toString() + "\\" + curFileName;
+                Document newFile = new Document(curFileName, newPath.toString(), false);
+                Utils.copyFile(file.getAbsolutePath(), newFile.path);
+                cur.addFile(newFile);
             }
         }
     }

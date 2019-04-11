@@ -1,5 +1,7 @@
 package Tools;
 
+import Settings.FileSettings;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -103,17 +105,30 @@ public final class Utils {
             }
         }
         folder.delete();
-
     }
 
     public static boolean isCharDigit(char ch) {
         return ch - '0' >= 0 && ch - '9' <= 0;
     }
 
-    // Query "4项目规划 表1" as "4"
-    public static String queryFilePathInName(String fileName) {
+    // "1-2-3xyz.pdf" -> "1-2-3xyz"
+    public static String getFileNameWithoutFormat(String fileName) {
+        String[] fileStrs = fileName.split(FileSettings.FILE_EXT_FORMAT);
+        return fileStrs[0];
+    }
+
+    // "1-2-3xyz.pdf" -> "1-2-3xyz=====appendStr.pdf"
+    public static String appendStringInFileName(String fileName, String appendStr) {
+        String[] fileNameStrs = fileName.split("\\.");
+        return fileNameStrs[0] + appendStr + "." + fileNameStrs[1];
+    }
+
+    // Query last file path from "1-2-3-4项目规划 表1.pdf" as "4"
+    public static String getLastFilePathInName(String fileName) {
+        String fileNameWithoutFormat = Utils.getFileNameWithoutFormat(fileName);
+        String[] filePaths = fileNameWithoutFormat.split(FileSettings.FILE_FORMAT_SPLITTER);
         StringBuilder sb = new StringBuilder();
-        for (char ch : fileName.toCharArray()) {
+        for (char ch : filePaths[filePaths.length - 1].toCharArray()) {
             if (Utils.isCharDigit(ch)) {
                 sb.append(ch);
             } else {
@@ -121,6 +136,11 @@ public final class Utils {
             }
         }
         return sb.toString();
+    }
+
+    // "1-2-3xyz.pdf" -> "1-2-3xyz-{index}.pdf"
+    public static String appendIndex(String fileName, int index) {
+        return Utils.appendStringInFileName(fileName, FileSettings.FILE_FORMAT_SPLITTER + index);
     }
 
     private static String getFilePath(String absolutePath) {

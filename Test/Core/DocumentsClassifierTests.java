@@ -1,9 +1,9 @@
 package Core;
 
-import Settings.FileSettings;
+import Settings.TestSettings;
+import TestUtils.TestUtils;
 import Tools.Utils;
-import org.junit.Assert;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.File;
 import java.util.Arrays;
@@ -14,6 +14,13 @@ import java.util.List;
  */
 
 public class DocumentsClassifierTests {
+    private final String TestPath = TestSettings.TEST_PATH + "\\DocumentsClassifierTests\\MockData";
+
+    @After
+    public void clear() throws Exception {
+//        Utils.deleteFolder(TestPath);
+    }
+
     @Test
     public void resetTest() throws Exception {
         DocumentsClassifier dc = new DocumentsClassifier(".");
@@ -28,17 +35,19 @@ public class DocumentsClassifierTests {
 
     @Test
     public void filePathRegExTest() {
-        String fileName = "1_2_3_4.txt";
+        String fileName = "1-2-3-4.txt";
         String[] strs = fileName.split("(?i)\\.");
+
+        Assert.assertEquals("1-2-3-4", strs[0]);
+        Assert.assertEquals("txt", strs[1]);
     }
 
     @Test
     public void getFilePathTest() throws Exception {
-        String testPath = FileSettings.DIRECTORY_PATH + "\\PathTest";
+        String testPath = TestPath + "\\FilePathTest";
         Utils.createWholePathIfNotExist(testPath);
 
-        File file = new File(testPath + "\\1_1.txt");
-        file.createNewFile();
+        File file = TestUtils.createFile(testPath, "1-1.txt");
 
         String[] filePaths = DocumentsClassifier.getFilePath(file);
 
@@ -51,10 +60,74 @@ public class DocumentsClassifierTests {
 
     @Test
     public void classifyTest() throws Exception {
-        DocumentsClassifier dc = new DocumentsClassifier(FileSettings.DIRECTORY_PATH + "\\Copy");
-        File folder = new File(FileSettings.DIRECTORY_PATH);
+        String testDataFolder = TestPath + "\\ClassifyTestData";
+        Utils.createWholePathIfNotExist(testDataFolder);
+
+        TestUtils.createFile(testDataFolder, "1-1abc.txt");
+        TestUtils.createFile(testDataFolder, "1-2abc.txt");
+        TestUtils.createFile(testDataFolder, "1-3abc.txt");
+
+        String targetFolder = TestPath + "\\ClassifyTestResult";
+        DocumentsClassifier dc = new DocumentsClassifier(targetFolder);
+        File folder = new File(testDataFolder);
         List<File> files = Arrays.asList(folder.listFiles());
 
         dc.classify(files);
     }
+
+
+    @Test
+    public void classifyTest_TwoFilesWithSameFilePath() throws Exception {
+        String testDataFolder = TestPath + "\\ClassifyTestData_TwoFilesWithSameFilePath";
+        Utils.createWholePathIfNotExist(testDataFolder);
+
+        TestUtils.createFile(testDataFolder, "1-1abc.txt");
+        TestUtils.createFile(testDataFolder, "1-1xyz.txt");
+        TestUtils.createFile(testDataFolder, "1-3abc.txt");
+
+        String targetFolder = TestPath + "\\ClassifyTestResult_TwoFilesWithSameFilePath";
+        DocumentsClassifier dc = new DocumentsClassifier(targetFolder);
+        File folder = new File(testDataFolder);
+        List<File> files = Arrays.asList(folder.listFiles());
+
+        dc.classify(files);
+    }
+
+    @Test
+    @Ignore
+    public void classifyTest_ThreeFilesWithSameFilePath() throws Exception {
+        String testDataFolder = TestPath + "\\ClassifyTestData_ThreeFilesWithSameFilePath";
+        Utils.createWholePathIfNotExist(testDataFolder);
+
+        TestUtils.createFile(testDataFolder, "1-1abc.txt");
+        TestUtils.createFile(testDataFolder, "1-1abc.txt");
+        TestUtils.createFile(testDataFolder, "1-1abc.txt");
+
+        String targetFolder = TestPath + "\\ClassifyTestResult_ThreeFilesWithSameFilePath";
+        DocumentsClassifier dc = new DocumentsClassifier(targetFolder);
+        File folder = new File(testDataFolder);
+        List<File> files = Arrays.asList(folder.listFiles());
+
+        dc.classify(files);
+    }
+
+    @Test
+    @Ignore
+    public void classifyTest_File1_2_3_4Exist() throws Exception {
+        String testDataFolder = TestPath + "\\ClassifyTestData_File1_2_3_4Exist";
+        Utils.createWholePathIfNotExist(testDataFolder);
+
+        TestUtils.createFile(testDataFolder, "1-2-3-4abc.txt");
+        TestUtils.createFile(testDataFolder, "1-2abc.txt");
+        TestUtils.createFile(testDataFolder, "1-1abc.txt");
+
+        String targetFolder = TestPath + "\\ClassifyTestResult_File1_2_3_4Exist";
+        DocumentsClassifier dc = new DocumentsClassifier(targetFolder);
+        File folder = new File(testDataFolder);
+        List<File> files = Arrays.asList(folder.listFiles());
+
+        dc.classify(files);
+    }
+
+
 }

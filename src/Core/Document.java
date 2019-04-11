@@ -36,7 +36,7 @@ public class Document {
 
 	public boolean addFile(Document file) throws Exception {
 		// The file name should be "4项目清单"
-		String filePath = Utils.queryFilePathInName(file.name);
+		String filePath = Utils.getLastFilePathInName(file.name);
 		if (!this.files.containsKey(filePath)) {
 			this.files.put(filePath, new HashMap<>());
 		}
@@ -59,7 +59,7 @@ public class Document {
 	}
 
 	public Document getFile(String fileName) {
-		String filePath = Utils.queryFilePathInName(fileName);
+		String filePath = Utils.getLastFilePathInName(fileName);
 		if (!this.files.containsKey(filePath) || !this.files.get(filePath).containsKey(fileName)) {
 			return null;
 		}
@@ -76,7 +76,7 @@ public class Document {
 	}
 
 	public void removeFile(String fileName) throws Exception {
-		String filePath = Utils.queryFilePathInName(fileName);
+		String filePath = Utils.getLastFilePathInName(fileName);
 		if (!this.files.containsKey(filePath) || !this.files.get(filePath).containsKey(fileName)) {
 			throw new Exception("file doesn't exist");
 		}
@@ -98,8 +98,14 @@ public class Document {
 	}
 
 	public boolean existFile(String fileName) {
-		String filePath = Utils.queryFilePathInName(fileName);
+		String filePath = Utils.getLastFilePathInName(fileName);
 		return this.files.containsKey(filePath) && this.files.get(filePath).containsKey(fileName);
+	}
+
+	// File names as "1-2-3abc.pdf" && "1-2-3xyc.pdf" are with the same path "1-2-3"
+	public boolean existFileWithSamePath(String fileName) {
+		String filePath = Utils.getLastFilePathInName(fileName);
+		return this.files.containsKey(filePath);
 	}
 
 	public boolean existFiles() {
