@@ -36,7 +36,9 @@ public class DocumentsClassifier {
     *           iii). Rename the target file and move it to the sub directory.
     *       b. If the file doesn't exist, copy the file to there.
     * */
-    public void classify(List<File> files) throws Exception {
+    /// Return warning files.
+    public List<Document> classify(List<File> files) throws Exception {
+        List<Document> warnFiles = new ArrayList<>();
         for (File file : files) {
             // file path as {"1", "2", "3", "4项目规划 表1", "pdf"},
             String[] filePaths = DocumentsClassifier.getFilePath(file);
@@ -73,7 +75,7 @@ public class DocumentsClassifier {
                             Utils.moveFile(existFile.path, newPath);
                             cur.getFolder(curFolderName).addFile(newFile);
 
-                            this.warnFileNeedToBeRevised(newFile);
+                            this.warnFileNeedToBeRevised(newFile, warnFiles);
                         }
 
                         cur.files.remove(curFolderName);
@@ -111,7 +113,7 @@ public class DocumentsClassifier {
                 Utils.copyFile(file.getAbsolutePath(), pathSB.toString());
                 cur.addFile(newFile);
 
-                this.warnFileNeedToBeRevised(newFile);
+                this.warnFileNeedToBeRevised(newFile, warnFiles);
             }
             // Edge case: Exist file with same path name in cur folder.
             // e.g. "1-2-3abc.pdf" && "1-2-3xyc.pdf".
@@ -133,7 +135,7 @@ public class DocumentsClassifier {
                     Utils.moveFile(existFile.path, newPath);
                     cur.getFolder(curFilePathInName).addFile(newFile);
 
-                    this.warnFileNeedToBeRevised(newFile);
+                    this.warnFileNeedToBeRevised(newFile, warnFiles);
                 }
                 cur.files.remove(curFilePathInName);
 
@@ -146,7 +148,7 @@ public class DocumentsClassifier {
                 Utils.copyFile(file.getAbsolutePath(), newFile.path);
                 cur.addFile(newFile);
 
-                this.warnFileNeedToBeRevised(newFile);
+                this.warnFileNeedToBeRevised(newFile, warnFiles);
             } else {
                 String newPath = pathSB.toString() + "\\" + curFileName;
                 Document newFile = new Document(curFileName, newPath.toString(), false);
@@ -154,6 +156,7 @@ public class DocumentsClassifier {
                 cur.addFile(newFile);
             }
         }
+        return warnFiles;
     }
 
     public void reset() {
@@ -192,7 +195,8 @@ public class DocumentsClassifier {
         return true;
     }
 
-    private void warnFileNeedToBeRevised(Document file) {
+    private void warnFileNeedToBeRevised(Document file, List<Document> warnFiles) {
+        warnFiles.add(file);
         System.out.printf("\n File need to be revised. File path: %s \n", file.path);
     }
 }

@@ -1,7 +1,10 @@
 import java.io.File;
+import java.util.List;
 
+import Core.Document;
+import Core.DocumentsClassifier;
+import Tools.Utils;
 import javafx.application.Application;
-import javafx.beans.value.ObservableListValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -19,7 +22,6 @@ import javafx.stage.Stage;
 
 public class Main extends Application implements EventHandler<ActionEvent> {
 
-    private Button inputFolderButton, outputFolderButton;
     private Stage mainWindow;
     private DirectoryChooser directoryChooser;
 
@@ -39,9 +41,10 @@ public class Main extends Application implements EventHandler<ActionEvent> {
         Text outputText = new Text();
         outputText.setText("Please select output folder");
 
-        this.inputFolderButton = new Button();
-        this.inputFolderButton.setText("Input Browser");
-        this.inputFolderButton.setOnAction(e -> {
+        final Button inputFolderButton, outputFolderButton, startClassifyButton;
+        inputFolderButton = new Button();
+        inputFolderButton.setText("Input Browser");
+        inputFolderButton.setOnAction(e -> {
             File dir = directoryChooser.showDialog(this.mainWindow);
             if (dir != null) {
                 inputText.setText(dir.getAbsolutePath());
@@ -50,9 +53,9 @@ public class Main extends Application implements EventHandler<ActionEvent> {
             }
         });
 
-        this.outputFolderButton = new Button();
-        this.outputFolderButton.setText("Output Browser");
-        this.outputFolderButton.setOnAction(e -> {
+        outputFolderButton = new Button();
+        outputFolderButton.setText("Output Browser");
+        outputFolderButton.setOnAction(e -> {
             File dir = directoryChooser.showDialog(this.mainWindow);
             if (dir != null) {
                 outputText.setText(dir.getAbsolutePath());
@@ -62,11 +65,31 @@ public class Main extends Application implements EventHandler<ActionEvent> {
         });
 
         ListView<String> warnList = new ListView<>();
-        ObservableList<String> items = FXCollections.observableArrayList("1-1.pdf", "1-2.pdf", "1-3.pdf");
-        warnList.setItems(items);
+
+        startClassifyButton = new Button();
+        startClassifyButton.setText("Start to classify!");
+        startClassifyButton.setOnAction(e -> {
+            String inputPath = inputText.getText();
+            String outputPath = outputText.getText();
+
+            try {
+                DocumentsClassifier dc = new DocumentsClassifier(outputPath);
+                List<File> files = Utils.getAllFiles(inputPath);
+                List<Document> warnFiles = dc.classify(files);
+
+                ObservableList<String> items = FXCollections.observableArrayList();
+                for (Document warnFile : warnFiles) {
+                    items.add(warnFile.path);
+                }
+                warnList.setItems(items);
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+
 
         BorderPane layout = this.getMainLayerout();
-        ((VBox)layout.getTop()).getChildren().addAll(inputText, inputFolderButton, outputText, outputFolderButton);
+        ((VBox)layout.getTop()).getChildren().addAll(inputText, inputFolderButton, outputText, outputFolderButton, startClassifyButton);
         ((GridPane)layout.getCenter()).getChildren().addAll(warnList);
 
         Scene scene = new Scene(layout, 300, 250);
@@ -77,9 +100,6 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 
     @Override
     public void handle(ActionEvent event) {
-        if (event.getSource() == this.inputFolderButton) {
-            this.inputFolderButton.setText("Oh yes gogogogo!");
-        }
     }
 
     private BorderPane getMainLayerout() {
