@@ -14,13 +14,14 @@ import javafx.event.EventHandler;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.layout.BorderPane;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
+import javafx.scene.paint.Color;
+import javafx.scene.paint.Paint;
 import javafx.scene.text.Text;
+import javafx.scene.text.TextBoundsType;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
+import org.junit.Test;
 
 public class Main extends Application implements EventHandler<ActionEvent> {
 
@@ -38,21 +39,42 @@ public class Main extends Application implements EventHandler<ActionEvent> {
         this.directoryChooser = new DirectoryChooser();
         this.directoryChooser.setTitle("Select pdf files root folder");
 
-        Text inputText = new Text();
+        Label inputLable = new Label();
+        inputLable.setText("Input folder:");
+        TextField inputText = new TextField();
         inputText.setText("Please select input folder");
-        Text outputText = new Text();
-        outputText.setText("Please select output folder");
-        Label failedSelectLabel = new Label();
+        inputText.setOnMouseClicked(e -> {
+            File dir = directoryChooser.showDialog(this.mainWindow);
+            if (dir != null) {
+                inputText.setText(dir.getAbsolutePath());
+            }
+        });
 
-        final Button inputFolderButton, outputFolderButton, startClassifyButton;
+
+        TextField outputText = new TextField();
+        Label outputLable = new Label();
+        outputLable.setText("Output folder:");
+        outputText.setText("Please select output folder");
+        outputText.setOnMouseClicked(e -> {
+            File dir = directoryChooser.showDialog(this.mainWindow);
+            if (dir != null) {
+                outputText.setText(dir.getAbsolutePath());
+            }
+        });
+
+
+        Label failedSelectLabel = new Label();
+        failedSelectLabel.setTextFill(Color.FIREBRICK);
+        failedSelectLabel.setText("Failed to select input or output path. Please select them first");
+        failedSelectLabel.setVisible(false);
+
+        Button inputFolderButton, outputFolderButton, startClassifyButton;
         inputFolderButton = new Button();
         inputFolderButton.setText("Input Browser");
         inputFolderButton.setOnAction(e -> {
             File dir = directoryChooser.showDialog(this.mainWindow);
             if (dir != null) {
                 inputText.setText(dir.getAbsolutePath());
-            } else {
-                inputText.setText("Filed to select directory!");
             }
         });
 
@@ -62,13 +84,8 @@ public class Main extends Application implements EventHandler<ActionEvent> {
             File dir = directoryChooser.showDialog(this.mainWindow);
             if (dir != null) {
                 outputText.setText(dir.getAbsolutePath());
-            } else {
-                outputText.setText("Filed to select directory!");
             }
         });
-
-        ListView<String> warnList = new ListView<>();
-        ListView<String> uncertainList = new ListView<>();
 
         startClassifyButton = new Button();
         startClassifyButton.setText("Start to classify!");
@@ -77,10 +94,10 @@ public class Main extends Application implements EventHandler<ActionEvent> {
             String outputPath = outputText.getText();
 
             if (!this.checkInputAndOutputPath(inputPath, outputPath)) {
-                failedSelectLabel.setText("Failed to select input or output path. Please select them first");
+                failedSelectLabel.setVisible(true);
                 return;
             } else {
-                failedSelectLabel.setText(null);
+                failedSelectLabel.setVisible(false);
             }
 
             try {
@@ -96,10 +113,21 @@ public class Main extends Application implements EventHandler<ActionEvent> {
         });
 
 
-        BorderPane layout = this.getMainLayerout();
-        ((VBox)layout.getTop()).getChildren().addAll(inputText, inputFolderButton, outputText, outputFolderButton, startClassifyButton, failedSelectLabel);
+        GridPane layout = new GridPane();
+        layout.setAlignment(Pos.CENTER);
+        layout.setHgap(20);
+        layout.setVgap(20);
 
-        Scene scene = new Scene(layout, 300, 250);
+        layout.add(inputLable, 0, 0);
+        layout.add(inputText, 1, 0, 2, 1);
+        layout.add(inputFolderButton, 4, 0);
+        layout.add(outputLable, 0, 2);
+        layout.add(outputText, 1, 2, 2, 1);
+        layout.add(outputFolderButton, 4, 2, 2, 1);
+        layout.add(startClassifyButton, 2, 4, 4, 2);
+        layout.add(failedSelectLabel, 0, 6, 4, 1);
+
+        Scene scene = new Scene(layout, 640, 480);
         primaryStage.setScene(scene);
 
         this.mainWindow.show();
@@ -109,33 +137,11 @@ public class Main extends Application implements EventHandler<ActionEvent> {
     public void handle(ActionEvent event) {
     }
 
-    private BorderPane getMainLayerout() {
-        BorderPane mainLayout = new BorderPane();
-
-        VBox top = new VBox();
-        top.setAlignment(Pos.CENTER);
-
-        GridPane center = new GridPane();
-
-        HBox bottom = new HBox();
-        bottom.setAlignment(Pos.CENTER);
-
-        mainLayout.setTop(top);
-        mainLayout.setBottom(bottom);
-        mainLayout.setCenter(center);
-
-        return mainLayout;
-    }
-
     private boolean checkInputAndOutputPath(String inputPath, String outputPath) {
-        if (inputPath.indexOf("\\") < 0 || outputPath.indexOf("\\") < 0) {
-            return false;
-        }
-        if (inputPath.indexOf("Failed") > -1 || outputPath.indexOf("Failed") > -1) {
-            return false;
-        }
-        return true;
+        return (this.checkStringIsPath(inputPath) && this.checkStringIsPath(outputPath));
     }
 
-//    private GridPane get
+    private boolean checkStringIsPath(String str) {
+        return (str.indexOf("\\") > -1 && str.indexOf(".") < 0);
+    }
 }
