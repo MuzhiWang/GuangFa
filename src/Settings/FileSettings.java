@@ -13,7 +13,11 @@ public final class FileSettings {
 
     public final static String DIRECTORY_PATH = "E:\\Muzhi\\Test";
 
+    public final static String FILE_EXT_FORMAT_STR = "(?i)(pdf|txt)";
+
     public final static String FILE_EXT_FORMAT = "(?i).(pdf|txt)";
+
+    public final static String FILE_SINGLE_PATH_FORMAT = "^(\\d+).*$";
 
     public final static String UNCERTERN_FILE_SUFFIX = "=====NeedToBeRevised";
 }

@@ -59,6 +59,30 @@ public class DocumentsClassifierTests {
     }
 
     @Test
+    public void isValidateFileTest() {
+        String fileName = "1-2-3-4哈哈哈哈 嘿.pdf";
+        Assert.assertTrue(DocumentsClassifier.isValidateFile(fileName));
+
+        fileName = "1-2-3-4哈哈哈哈 嘿.PDF";
+        Assert.assertTrue(DocumentsClassifier.isValidateFile(fileName));
+
+        fileName = "1-2-3-44435.pdf";
+        Assert.assertTrue(DocumentsClassifier.isValidateFile(fileName));
+
+        fileName = "1-22-3-4abadfsa123.pdf";
+        Assert.assertTrue(DocumentsClassifier.isValidateFile(fileName));
+
+        fileName = "1-22-3-4abadfsa-123.pdf";
+        Assert.assertFalse(DocumentsClassifier.isValidateFile(fileName));
+
+        fileName = "1-22-3-abc4.pdf";
+        Assert.assertFalse(DocumentsClassifier.isValidateFile(fileName));
+
+        fileName = "1-22-3-abc4.log";
+        Assert.assertFalse(DocumentsClassifier.isValidateFile(fileName));
+    }
+
+    @Test
     public void classifyTest() throws Exception {
         String testDataFolder = TestPath + "\\ClassifyTestData_GeneralTest";
         Utils.createWholePathIfNotExist(testDataFolder);

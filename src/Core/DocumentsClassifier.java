@@ -37,9 +37,16 @@ public class DocumentsClassifier {
     *       b. If the file doesn't exist, copy the file to there.
     * */
     /// Return warning files.
-    public List<Document> classify(List<File> files) throws Exception {
-        List<Document> warnFiles = new ArrayList<>();
+    public ClassifyResult classify(List<File> files) throws Exception {
+        ClassifyResult result = new ClassifyResult();
+
         for (File file : files) {
+            if (!DocumentsClassifier.isValidateFile(file.getName())) {
+                result.uncertainFiles.add(file);
+                System.out.printf("\nUncertain file found. Path: %s \n", file.getAbsolutePath());
+                continue;
+            }
+
             // file path as {"1", "2", "3", "4项目规划 表1", "pdf"},
             String[] filePaths = DocumentsClassifier.getFilePath(file);
             String fileFormat = "." + filePaths[filePaths.length - 1];
@@ -75,7 +82,7 @@ public class DocumentsClassifier {
                             Utils.moveFile(existFile.path, newPath);
                             cur.getFolder(curFolderName).addFile(newFile);
 
-                            this.warnFileNeedToBeRevised(newFile, warnFiles);
+                            this.warnFileNeedToBeRevised(newFile, result.warnDocuments);
                         }
 
                         cur.files.remove(curFolderName);
@@ -113,7 +120,7 @@ public class DocumentsClassifier {
                 Utils.copyFile(file.getAbsolutePath(), pathSB.toString());
                 cur.addFile(newFile);
 
-                this.warnFileNeedToBeRevised(newFile, warnFiles);
+                this.warnFileNeedToBeRevised(newFile, result.warnDocuments);
             }
             // Edge case: Exist file with same path name in cur folder.
             // e.g. "1-2-3abc.pdf" && "1-2-3xyc.pdf".
@@ -135,7 +142,7 @@ public class DocumentsClassifier {
                     Utils.moveFile(existFile.path, newPath);
                     cur.getFolder(curFilePathInName).addFile(newFile);
 
-                    this.warnFileNeedToBeRevised(newFile, warnFiles);
+                    this.warnFileNeedToBeRevised(newFile, result.warnDocuments);
                 }
                 cur.files.remove(curFilePathInName);
 
@@ -148,7 +155,7 @@ public class DocumentsClassifier {
                 Utils.copyFile(file.getAbsolutePath(), newFile.path);
                 cur.addFile(newFile);
 
-                this.warnFileNeedToBeRevised(newFile, warnFiles);
+                this.warnFileNeedToBeRevised(newFile, result.warnDocuments);
             } else {
                 String newPath = pathSB.toString() + "\\" + curFileName;
                 Document newFile = new Document(curFileName, newPath.toString(), false);
@@ -156,7 +163,7 @@ public class DocumentsClassifier {
                 cur.addFile(newFile);
             }
         }
-        return warnFiles;
+        return result;
     }
 
     public void reset() {
@@ -167,18 +174,53 @@ public class DocumentsClassifier {
         return this.root;
     }
 
+    protected static boolean isValidateFile(String fileName) {
+        if (fileName == null || fileName.isEmpty() || fileName.indexOf(FileSettings.UNCERTERN_FILE_SUFFIX) > -1) {
+            return false;
+        }
+
+        String[] nameStrs = fileName.split(FileSettings.FILE_FORMAT_SPLITTER);
+
+        if (nameStrs == null || nameStrs.length == 0) {
+            return false;
+        }
+
+        for (int i = 0; i < nameStrs.length - 1; ++i) {
+            try {
+                Integer.parseInt(nameStrs[i]);
+            } catch (Exception ex) {
+                System.out.println("The middle path name not match");
+                return false;
+            }
+        }
+
+        // Last str should be as "4项目规划 表.pdf"
+        String lastStr = nameStrs[nameStrs.length - 1];
+        String[] lastStrSplit = lastStr.split("\\.");
+        if (lastStrSplit == null || lastStrSplit.length < 2) {
+            return false;
+        }
+        if (!lastStrSplit[0].matches(FileSettings.FILE_SINGLE_PATH_FORMAT)) {
+            System.out.println("The last path name not match");
+            return false;
+        }
+        if (!lastStrSplit[1].matches(FileSettings.FILE_EXT_FORMAT_STR)) {
+            System.out.println("The file format not match");
+            return false;
+        }
+
+        return true;
+    }
+
     /*
     * Based on file name's format, such as "1_2_3_4项目规划 表1.pdf",
     * we want to get file path as {"1", "2", "3", "4项目规划 表1", "pdf"}, the "4" should be the file name.
     * */
-    protected static String[] getFilePath(File file) throws Exception {
+    protected static String[] getFilePath(File file) {
         String fileName = file.getName();
 
         // Split to {"1_2_3_4项目规划 表1", "pdf"}
         String[] fileNameStrs = fileName.split("\\.");
-        if (!DocumentsClassifier.checkFileName(fileNameStrs)) {
-            throw new Exception("invalid file names");
-        }
 
         // Split "1_2_3_4项目规划 表1" to {"1", "2", "3", "4项目规划 表1"}
         String[] fileNameStrsPart1 = fileNameStrs[0].split(FileSettings.FILE_FORMAT_SPLITTER);
@@ -186,13 +228,6 @@ public class DocumentsClassifier {
         List<String> strs = new ArrayList<>(Arrays.asList(fileNameStrsPart1));
         strs.add(fileNameStrs[fileNameStrs.length - 1]);
         return strs.toArray(new String[strs.size()]);
-    }
-
-    private static boolean checkFileName(String[] fileNameStrs) {
-        if (fileNameStrs == null || fileNameStrs.length < 2) {
-            return false;
-        }
-        return true;
     }
 
     private void warnFileNeedToBeRevised(Document file, List<Document> warnFiles) {

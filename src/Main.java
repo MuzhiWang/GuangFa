@@ -1,9 +1,11 @@
 import java.io.File;
 import java.util.List;
 
+import Core.ClassifyResult;
 import Core.Document;
 import Core.DocumentsClassifier;
 import Tools.Utils;
+import UX.RevisedFilesWindow;
 import javafx.application.Application;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -32,7 +34,7 @@ public class Main extends Application implements EventHandler<ActionEvent> {
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.mainWindow = primaryStage;
-        this.mainWindow.setTitle("哈哈哈广发发发");
+        this.mainWindow.setTitle("广发 File Classification");
         this.directoryChooser = new DirectoryChooser();
         this.directoryChooser.setTitle("Select pdf files root folder");
 
@@ -40,6 +42,7 @@ public class Main extends Application implements EventHandler<ActionEvent> {
         inputText.setText("Please select input folder");
         Text outputText = new Text();
         outputText.setText("Please select output folder");
+        Label failedSelectLabel = new Label();
 
         final Button inputFolderButton, outputFolderButton, startClassifyButton;
         inputFolderButton = new Button();
@@ -65,6 +68,7 @@ public class Main extends Application implements EventHandler<ActionEvent> {
         });
 
         ListView<String> warnList = new ListView<>();
+        ListView<String> uncertainList = new ListView<>();
 
         startClassifyButton = new Button();
         startClassifyButton.setText("Start to classify!");
@@ -72,16 +76,20 @@ public class Main extends Application implements EventHandler<ActionEvent> {
             String inputPath = inputText.getText();
             String outputPath = outputText.getText();
 
+            if (!this.checkInputAndOutputPath(inputPath, outputPath)) {
+                failedSelectLabel.setText("Failed to select input or output path. Please select them first");
+                return;
+            } else {
+                failedSelectLabel.setText(null);
+            }
+
             try {
                 DocumentsClassifier dc = new DocumentsClassifier(outputPath);
                 List<File> files = Utils.getAllFiles(inputPath);
-                List<Document> warnFiles = dc.classify(files);
+                ClassifyResult result = dc.classify(files);
 
-                ObservableList<String> items = FXCollections.observableArrayList();
-                for (Document warnFile : warnFiles) {
-                    items.add(warnFile.path);
-                }
-                warnList.setItems(items);
+                RevisedFilesWindow revisedFilesWindow = new RevisedFilesWindow(result);
+                revisedFilesWindow.show();
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
@@ -89,8 +97,7 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 
 
         BorderPane layout = this.getMainLayerout();
-        ((VBox)layout.getTop()).getChildren().addAll(inputText, inputFolderButton, outputText, outputFolderButton, startClassifyButton);
-        ((GridPane)layout.getCenter()).getChildren().addAll(warnList);
+        ((VBox)layout.getTop()).getChildren().addAll(inputText, inputFolderButton, outputText, outputFolderButton, startClassifyButton, failedSelectLabel);
 
         Scene scene = new Scene(layout, 300, 250);
         primaryStage.setScene(scene);
@@ -119,4 +126,16 @@ public class Main extends Application implements EventHandler<ActionEvent> {
 
         return mainLayout;
     }
+
+    private boolean checkInputAndOutputPath(String inputPath, String outputPath) {
+        if (inputPath.indexOf("\\") < 0 || outputPath.indexOf("\\") < 0) {
+            return false;
+        }
+        if (inputPath.indexOf("Failed") > -1 || outputPath.indexOf("Failed") > -1) {
+            return false;
+        }
+        return true;
+    }
+
+//    private GridPane get
 }
