@@ -5,4 +5,6 @@ package Settings;
  */
 public class TestSettings {
     public final static String TEST_PATH = ".\\Test\\UnitTests";
+
+    public final static String TEST_MATERIALS_PATH = ".\\Test\\TestMaterials";
 }

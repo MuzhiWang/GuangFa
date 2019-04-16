@@ -1,9 +1,8 @@
-package Utils;
+package Tools;
 
 import Settings.FileSettings;
 import Settings.TestSettings;
 import TestUtils.TestUtils;
-import Tools.Utils;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Test;
