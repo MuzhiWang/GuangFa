@@ -1,5 +1,7 @@
 package Tools;
 
+import Settings.FileSettings;
+
 import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Map;
@@ -45,6 +47,32 @@ public class StringUtils {
         }
 
         return Integer.toString(StringUtils.parseNumber(str));
+    }
+
+    // Get "十二" in "第十二章"
+    public static String getChineseNumberInString(String str) {
+        Pattern pattern = Pattern.compile(FileSettings.ExcelCellSettings.CHINESE_NUMBER_PATTERN);
+        Matcher matcher = pattern.matcher(str);
+        if (matcher.find()) {
+            return matcher.group(0);
+        }
+        return "";
+    }
+
+    // Get "1—1" as "1-1"
+    public static String getUniformString(String str) {
+        return str.replace(FileSettings.EMPTY_SPACE_FORMAT, "").replaceAll(FileSettings.ExcelCellSettings.TITLE_SPLITTER, "-");
+    }
+
+    // Get "1-2-3" from "1-2-3 项目审计"
+    public static String getTitleInString(String str) {
+        String uniformStr = StringUtils.getUniformString(str);
+        Pattern pattern = Pattern.compile(FileSettings.ExcelCellSettings.TITLE_FORMAT);
+        Matcher matcher = pattern.matcher(uniformStr);
+        if (matcher.find()) {
+            return matcher.group(1);
+        }
+        return "";
     }
 
     /**

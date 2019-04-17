@@ -1,14 +1,11 @@
 import java.io.File;
 import java.util.List;
 
-import Core.ClassifyResult;
-import Core.Document;
+import Core.DocumentClassifyResult;
 import Core.DocumentsClassifier;
 import Tools.Utils;
 import UX.RevisedFilesWindow;
 import javafx.application.Application;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Pos;
@@ -16,12 +13,8 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
-import javafx.scene.paint.Paint;
-import javafx.scene.text.Text;
-import javafx.scene.text.TextBoundsType;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.Stage;
-import org.junit.Test;
 
 public class Main extends Application implements EventHandler<ActionEvent> {
 
@@ -103,7 +96,7 @@ public class Main extends Application implements EventHandler<ActionEvent> {
             try {
                 DocumentsClassifier dc = new DocumentsClassifier(outputPath);
                 List<File> files = Utils.getAllFiles(inputPath);
-                ClassifyResult result = dc.classify(files);
+                DocumentClassifyResult result = dc.classify(files);
 
                 RevisedFilesWindow revisedFilesWindow = new RevisedFilesWindow(result);
                 revisedFilesWindow.show();

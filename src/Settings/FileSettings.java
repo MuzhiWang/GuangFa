@@ -29,6 +29,8 @@ public final class FileSettings {
 
     public final static String TITLE_SECTION_FORMAT = "第%s章";
 
+    public final static String EMPTY_SPACE_FORMAT = "\\s+";
+
     public static class ExcelCellSettings {
         // Match as "1-2-3" or "12"
         public final static String TITLE_FORMAT = "\\b(((\\d+)\\-){1,10}(\\d+)|(\\d+))\\b";
@@ -39,9 +41,14 @@ public final class FileSettings {
 
         public final static String TITLE_PART = "部分";
 
-        public final static String CHINESE_NUMBER = "一二三四五六七八九〇十百千万";
+        public final static String CHINESE_NUMBER = "一二三四五六七八九〇十百千万零";
+
+        public final static String CHINESE_NUMBER_PATTERN = String.format("[%s]+", CHINESE_NUMBER);
 
         // e.g.  "第一章" "第二部分"
         public final static String CHINESE_TITLE_FORMAT = String.format("第[%s]+(%s|%s)", CHINESE_NUMBER, TITLE_SECTION, TITLE_PART);
+
+        // e.g. "第一部分"
+        public final static String CHINESE_TITLE_PART_FORMAT = String.format("第[%s]+%s", CHINESE_NUMBER, TITLE_PART);
     }
 }

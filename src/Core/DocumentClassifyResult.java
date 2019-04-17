@@ -7,12 +7,12 @@ import java.util.List;
 /**
  * Created by muwang on 4/12/2019.
  */
-public class ClassifyResult {
+public class DocumentClassifyResult {
     public List<Document> warnDocuments;
 
     public List<File> uncertainFiles;
 
-    public ClassifyResult() {
+    public DocumentClassifyResult() {
         this.warnDocuments = new ArrayList<>();
         this.uncertainFiles = new ArrayList<>();
     }

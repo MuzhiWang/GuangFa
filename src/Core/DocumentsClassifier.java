@@ -37,8 +37,8 @@ public class DocumentsClassifier {
     *       b. If the file doesn't exist, copy the file to there.
     * */
     /// Return warning files.
-    public ClassifyResult classify(List<File> files) throws Exception {
-        ClassifyResult result = new ClassifyResult();
+    public DocumentClassifyResult classify(List<File> files) throws Exception {
+        DocumentClassifyResult result = new DocumentClassifyResult();
 
         for (File file : files) {
             if (!DocumentsClassifier.isValidateFile(file.getName())) {

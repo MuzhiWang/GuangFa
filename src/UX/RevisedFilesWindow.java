@@ -1,6 +1,6 @@
 package UX;
 
-import Core.ClassifyResult;
+import Core.DocumentClassifyResult;
 import Core.Document;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -25,9 +25,9 @@ import java.io.IOException;
  */
 public class RevisedFilesWindow {
 
-    private ClassifyResult result;
+    private DocumentClassifyResult result;
 
-    public RevisedFilesWindow(ClassifyResult result) {
+    public RevisedFilesWindow(DocumentClassifyResult result) {
         this.result = result;
     }
 
