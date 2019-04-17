@@ -1,10 +1,10 @@
 package Tools;
 
+import Core.TitleCollection;
 import Settings.FileSettings;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.util.CellAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
@@ -15,7 +15,7 @@ import java.util.Iterator;
  * Created by muwang on 4/15/2019.
  */
 public final class ExcelUtils {
-    public static void readExcel(String filePath) throws Exception {
+    public static void readExcelToTitleCollection(String filePath, TitleCollection titleCollection) throws Exception {
         ExcelUtils.checkExcelFilePath(filePath);
 
         try {
