@@ -1,5 +1,7 @@
 package Core;
 
+import Tools.Utils;
+
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
@@ -16,7 +18,7 @@ public class TitleEntry {
     public File file;
 
     public TitleEntry(String path, String comment, boolean isFile) {
-        this.path = path;
+        this.path = this.createFullFolderPath(path, comment);
         this.comment = comment;
         this.isFile = isFile;
         this.file = null;
@@ -25,11 +27,16 @@ public class TitleEntry {
         }
     }
 
-    public boolean addTitleEntry(String titleIndex, TitleEntry entry) {
+    public boolean addTitleEntry(String titleIndex, TitleEntry entry, boolean createRealFolder) {
         if (this.maps.containsKey(titleIndex)) {
             return false;
         }
         this.maps.put(titleIndex, entry);
+
+        // Create real folders in path.
+        if (!entry.isFile && createRealFolder) {
+            this.createFoldersInWholePath(entry.path);
+        }
         return true;
     }
 
@@ -45,11 +52,15 @@ public class TitleEntry {
         return this.maps.containsKey(titileIndex) && !this.maps.get(titileIndex).isFile;
     }
 
-    public void changeFileToFolder() {
+    public void changeFileToFolder(boolean createRealFolder) {
         if (!this.isFile) return;
         this.isFile = false;
         this.maps = new HashMap<>();
         this.file = null;
+
+        if (createRealFolder) {
+            Utils.createWholePathIfNotExist(this.path);
+        }
     }
 
     public boolean addFile(File file) {
@@ -64,5 +75,13 @@ public class TitleEntry {
             throw new Exception("This is folder");
         }
         return this.file != null;
+    }
+
+    private void createFoldersInWholePath(String path) {
+        Utils.createWholePathIfNotExist(path);
+    }
+
+    private String createFullFolderPath(String path, String comment) {
+        return comment == null || comment.isEmpty() ? path : path + " " + comment;
     }
 }

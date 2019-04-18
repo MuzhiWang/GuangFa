@@ -33,6 +33,6 @@ public class TitleEntryClassifierTests {
         TestUtils.createFile(inputFolder, "1-2-3 报告.txt");
 
         TitleEntryClassifier classifier = new TitleEntryClassifier(INPUT_PATH, OUTPUT_PATH);
-        classifier.classify(TEST_EXCEL_FILE);
+        classifier.classify(TEST_EXCEL_FILE, false);
     }
 }

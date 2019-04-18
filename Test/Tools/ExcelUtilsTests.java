@@ -12,8 +12,8 @@ public class ExcelUtilsTests {
 
     @Test
     public void readExcelTest() throws Exception {
-        TitleCollection titleCollection = new TitleCollection(".");
-        ExcelUtils.readExcelToTitleCollection(TEST_EXCEL_FILE, titleCollection);
+        TitleCollection titleCollection = new TitleCollection(TestSettings.TEST_PATH + "\\ExcelUtilsTests");
+        ExcelUtils.readExcelToTitleCollection(TEST_EXCEL_FILE, titleCollection, false);
     }
 
 

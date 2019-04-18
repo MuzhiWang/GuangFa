@@ -16,20 +16,20 @@ import java.util.Iterator;
  * Created by muwang on 4/15/2019.
  */
 public final class ExcelUtils {
-    public static void readExcelToTitleCollection(String excelFilePath, TitleCollection titleCollection) throws Exception {
+    public static void readExcelToTitleCollection(String excelFilePath, TitleCollection titleCollection, boolean readAllSheets) throws Exception {
         ExcelUtils.checkExcelFilePath(excelFilePath);
 
         try {
             FileInputStream file = new FileInputStream(excelFilePath);
             XSSFWorkbook wb = new XSSFWorkbook(file);
             Iterator<Sheet> sheetIterator = wb.sheetIterator();
+            TitleEntry curPartEntry = null;
             while (sheetIterator.hasNext()) {
                 Sheet sheet = sheetIterator.next();
                 Row row;
                 Cell cell;
 
                 Iterator<Row> rowIterator = sheet.rowIterator();
-                TitleEntry curPartEntry = null;
                 while (rowIterator.hasNext()) {
                     row = rowIterator.next();
                     Iterator<Cell> cellIterator = row.cellIterator();
@@ -39,6 +39,7 @@ public final class ExcelUtils {
                         switch (cell.getCellType()) {
                             case STRING:
                                 String str = cell.getStringCellValue();
+                                // e.g. "1-2-3"
                                 if (ExcelUtils.isDigitTitleString(str)) {
                                     int cIndex = cell.getColumnIndex();
                                     Cell nextCell = cell.getRow().getCell(cIndex + 1);
@@ -54,11 +55,11 @@ public final class ExcelUtils {
                                         // Case1: Same path name File exist, change it to Folder.
                                         // Such as "1-1" as file exist, then find "1-1-1", then "1-1" should be changed to Folder
                                         if (curEntry.existFile(curPathStr)) {
-                                            curEntry.maps.get(curPathStr).changeFileToFolder();
+                                            curEntry.maps.get(curPathStr).changeFileToFolder(true);
                                         } else if (!curEntry.existFolder(curPathStr)) {
                                             String newPath = curEntry.path + "\\" + uniformTitleStr;
                                             TitleEntry newEntry = new TitleEntry(newPath, comment, false);
-                                            curEntry.addTitleEntry(curPathStr, newEntry);
+                                            curEntry.addTitleEntry(curPathStr, newEntry, false);
                                         }
 
                                         curEntry = curEntry.maps.get(curPathStr);
@@ -81,24 +82,30 @@ public final class ExcelUtils {
                                     } else {
                                         String newPath = String.format("%s\\%s", curEntry.path, uniformTitleStr);
                                         TitleEntry newEntry = new TitleEntry(newPath, comment, true);
-                                        curEntry.addTitleEntry(curPathStr, newEntry);
+                                        curEntry.addTitleEntry(curPathStr, newEntry, true);
                                     }
                                     System.out.printf("Cell is String : %s, next cell: %s\n", str, nextCell.getStringCellValue());
-                                } else if (ExcelUtils.isChineseTitleString(str)) {
+                                }
+                                // e.g. "第二部分 审计" or "第一章 报表"
+                                else if (ExcelUtils.isChineseTitleString(str)) {
                                     String[] splitStrs = str.split(FileSettings.EMPTY_SPACE_FORMAT);
                                     String title = splitStrs[0], comment = splitStrs[1];
                                     String chineseNum = StringUtils.getChineseNumberInString(title);
                                     String digitNum = StringUtils.mapChineseNumberToDigit(chineseNum);
 
+                                    // e.g. "第二部分"
                                     if (title.indexOf(FileSettings.ExcelCellSettings.TITLE_PART) > -1) {
-                                        // Error case: Same part exist.
+                                        // Error case: Same part exist before. Need to switch to that part.
                                         if (titleCollection.partsMap.containsKey(digitNum)) {
-                                            titleCollection.errorCollection.duplicatedParts.add(title);
+                                            titleCollection.errorCollection.duplicatedParts.add("Parts exist before: " + title);
+                                            curPartEntry = titleCollection.partsMap.get(digitNum);
                                         } else {
                                             titleCollection.addPart(digitNum, title, comment);
                                             curPartEntry = titleCollection.partsMap.get(digitNum);
                                         }
-                                    } else if (title.indexOf(FileSettings.ExcelCellSettings.TITLE_SECTION) > -1) {
+                                    }
+                                    // e.g. "第一章"
+                                    else if (title.indexOf(FileSettings.ExcelCellSettings.TITLE_SECTION) > -1) {
                                         // Error case: part not select yet.
                                         if (curPartEntry == null) {
                                             titleCollection.errorCollection.notExistParts.add(
@@ -114,7 +121,7 @@ public final class ExcelUtils {
                                             } else {
                                                 String newPath = partEntry.path + "\\" + title;
                                                 TitleEntry newEntry = new TitleEntry(newPath, comment, false);
-                                                partEntry.addTitleEntry(digitNum, newEntry);
+                                                partEntry.addTitleEntry(digitNum, newEntry, true);
                                             }
                                         }
                                     } else {
@@ -130,6 +137,10 @@ public final class ExcelUtils {
                                 break;
                         }
                     }
+                }
+
+                if (!readAllSheets) {
+                    break;
                 }
             }
 
