@@ -104,6 +104,8 @@ public class TitleEntryClassifier {
                                         String.format("File with same path already copied: %s\n", file.getAbsolutePath())
                                 );
                             } else {
+                                String newPath = curEntry.path + "\\" + fileName;
+                                Utils.copyFile(file.getAbsolutePath(), newPath);
                                 fileEntry.addFile(file);
                                 System.out.printf("Move files if not exist from: %s, to: %s\n", file.getAbsolutePath(), curEntry.path);
                             }
@@ -112,6 +114,8 @@ public class TitleEntryClassifier {
                 }
             }
         }
+
+        this.checkAllFilesInTitleCollection();
     }
 
     public CheckInputPathResult checkInputPath() {
@@ -141,8 +145,34 @@ public class TitleEntryClassifier {
         ExcelUtils.readExcelToTitleCollection(excelPath, this.titleCollection);
 
         Utils.deleteFolder(this.outputPath);
+        Utils.createWholePathIfNotExist(this.outputPath);
     }
 
+    private void checkAllFilesInTitleCollection() throws Exception {
+        List<TitleEntry> uncheckedFiles = new ArrayList<>();
+        for (TitleEntry titleEntry : this.titleCollection.partsMap.values()) {
+            uncheckedFiles.addAll(this.checkTitleEntry(titleEntry));
+        }
+        for (TitleEntry titleEntry : uncheckedFiles) {
+            this.titleCollection.errorCollection.notExistFiles.add(
+                    String.format("The file queried from Excel doesn't exist in input folder: %s\n", titleEntry.path)
+            );
+        }
+    }
+
+    private List<TitleEntry> checkTitleEntry(TitleEntry titleEntry) throws Exception {
+        List<TitleEntry> uncheckedEntries = new ArrayList<>();
+        if (titleEntry.isFile) {
+            if (!titleEntry.fileExist()) {
+                uncheckedEntries.add(titleEntry);
+            }
+        } else {
+            for (TitleEntry subEntry : titleEntry.maps.values()) {
+                uncheckedEntries.addAll(this.checkTitleEntry(subEntry));
+            }
+        }
+        return uncheckedEntries;
+    }
 
     public class CheckInputPathResult {
         public boolean inputPathValid = true;
