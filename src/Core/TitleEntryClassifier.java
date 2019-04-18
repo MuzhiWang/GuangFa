@@ -25,9 +25,9 @@ public class TitleEntryClassifier {
         this.titleCollection = new TitleCollection(outputPath);
     }
 
-    public void classify(String excelPath, boolean readAllSheets) throws Exception {
+    public TitleCollection classify(String excelPath, boolean readAllSheets) throws Exception {
         if (!this.checkInputPath().inputPathValid) {
-            return;
+            return this.titleCollection;
         }
 
         this.initialize(excelPath, readAllSheets);
@@ -116,6 +116,8 @@ public class TitleEntryClassifier {
         }
 
         this.checkAllFilesInTitleCollection();
+
+        return this.titleCollection;
     }
 
     public CheckInputPathResult checkInputPath() {
@@ -142,10 +144,10 @@ public class TitleEntryClassifier {
     }
 
     private void initialize(String excelPath, boolean readAllSheets) throws Exception {
-        ExcelUtils.readExcelToTitleCollection(excelPath, this.titleCollection, readAllSheets);
-
         Utils.deleteFolder(this.outputPath);
         Utils.createWholePathIfNotExist(this.outputPath);
+
+        ExcelUtils.readExcelToTitleCollection(excelPath, this.titleCollection, readAllSheets);
     }
 
     private void checkAllFilesInTitleCollection() throws Exception {

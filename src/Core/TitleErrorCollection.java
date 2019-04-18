@@ -1,5 +1,6 @@
 package Core;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,5 +51,35 @@ public class TitleErrorCollection {
         this.fileNameException = new ArrayList<>();
         this.notExistFiles = new ArrayList<>();
         this.notExistPaths = new ArrayList<>();
+    }
+
+    public List<String> listAllErrors() {
+        List<String> allErrors = new ArrayList<>();
+        allErrors.addAll(notExistTitleEntries);
+        allErrors.addAll(duplicatedTitleEntries);
+        allErrors.addAll(notExistParts);
+        allErrors.addAll(duplicatedParts);
+        allErrors.addAll(notExistSections);
+        allErrors.addAll(duplicatedSections);
+        allErrors.addAll(otherErrors);
+        allErrors.addAll(duplicatedFiles);
+        allErrors.addAll(incorrectPathFiles);
+        allErrors.addAll(fileNameException);
+        allErrors.addAll(notExistFiles);
+        allErrors.addAll(notExistPaths);
+
+        return allErrors;
+    }
+
+    public class TitleError {
+        public ErrorPosition errorPosition;
+        public File file;
+        public String errorPath;
+        public String errorInformation;
+    }
+
+    public enum ErrorPosition {
+        Excel,
+        InputFolder
     }
 }

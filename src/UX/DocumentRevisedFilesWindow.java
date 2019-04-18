@@ -23,11 +23,11 @@ import java.io.IOException;
 /**
  * Created by muwang on 4/12/2019.
  */
-public class RevisedFilesWindow {
+public class DocumentRevisedFilesWindow {
 
     private DocumentClassifyResult result;
 
-    public RevisedFilesWindow(DocumentClassifyResult result) {
+    public DocumentRevisedFilesWindow(DocumentClassifyResult result) {
         this.result = result;
     }
 
