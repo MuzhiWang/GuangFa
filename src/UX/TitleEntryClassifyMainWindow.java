@@ -4,26 +4,35 @@ import Core.DocumentClassifyResult;
 import Core.DocumentsClassifier;
 import Core.TitleCollection;
 import Core.TitleEntryClassifier;
+import Settings.FileSettings;
 import Tools.Utils;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.VBox;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.text.FontWeight;
 import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
+import java.awt.*;
 import java.io.File;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by muwang on 4/18/2019.
  */
 public class TitleEntryClassifyMainWindow {
+
+    private final static Font labelFont = Font.font("Arial", FontWeight.SEMI_BOLD, FontPosture.REGULAR, 16);
 
     public static void apply(Stage window, DirectoryChooser directoryChooser) {
         FileChooser fileChooser = new FileChooser();
@@ -31,19 +40,32 @@ public class TitleEntryClassifyMainWindow {
 
         Label excelLabel = new Label();
         excelLabel.setText("Excel file:");
+        excelLabel.setFont(labelFont);
         TextField excelText = new TextField();
-        excelText.setText("Please select excel file.");
+        excelText.setText("Please select excel file");
+        excelText.setMinWidth(200);
+        Label excelErrorLabel = new Label();
+        excelErrorLabel.setText("Select file must be excel file, which end up with '.xlsx' or 'xls'");
+        excelErrorLabel.setTextFill(Color.FIREBRICK);
+        excelErrorLabel.setVisible(false);
         excelText.setOnMouseClicked(e -> {
             File file = fileChooser.showOpenDialog(window);
             if (file != null) {
                 excelText.setText(file.getAbsolutePath());
+                if (checkExcelFile(excelText.getText())) {
+                    excelErrorLabel.setVisible(false);
+                } else {
+                    excelErrorLabel.setVisible(true);
+                }
             }
         });
 
         Label inputLable = new Label();
         inputLable.setText("Input folder:");
+        inputLable.setFont(labelFont);
         TextField inputText = new TextField();
         inputText.setText("Please select input folder");
+        inputText.setMinWidth(200);
         inputText.setOnMouseClicked(e -> {
             File dir = directoryChooser.showDialog(window);
             if (dir != null) {
@@ -53,8 +75,10 @@ public class TitleEntryClassifyMainWindow {
 
         TextField outputText = new TextField();
         Label outputLable = new Label();
+        outputLable.setFont(labelFont);
         outputLable.setText("Output folder:");
         outputText.setText("Please select output folder");
+        outputText.setMinWidth(200);
         outputText.setOnMouseClicked(e -> {
             File dir = directoryChooser.showDialog(window);
             if (dir != null) {
@@ -73,9 +97,14 @@ public class TitleEntryClassifyMainWindow {
         excelSelectButton = new Button();
         excelSelectButton.setText("Excel file Browser");
         excelSelectButton.setOnAction(e -> {
-            File dir = directoryChooser.showDialog(window);
-            if (dir != null) {
-                excelText.setText(dir.getAbsolutePath());
+            File file = fileChooser.showOpenDialog(window);
+            if (file != null) {
+                excelText.setText(file.getAbsolutePath());
+                if (checkExcelFile(excelText.getText())) {
+                    excelErrorLabel.setVisible(false);
+                } else {
+                    excelErrorLabel.setVisible(true);
+                }
             }
         });
 
@@ -104,7 +133,7 @@ public class TitleEntryClassifyMainWindow {
             String inputPath = inputText.getText();
             String outputPath = outputText.getText();
 
-            if (!checkInputAndOutputPath(inputPath, outputPath)) {
+            if (!checkInputAndOutputPath(inputPath, outputPath) || !checkExcelFile(excelPath)) {
                 failedSelectLabel.setVisible(true);
                 return;
             } else {
@@ -129,11 +158,12 @@ public class TitleEntryClassifyMainWindow {
         layout.setVgap(20);
 
         VBox vBox = new VBox();
-        vBox.getChildren().addAll(excelLabel, excelText, excelSelectButton);
-//        layout.add(excelLabel, 0, 0);
-//        layout.add(excelText, 1, 0, 2, 1);
-//        layout.add(excelSelectButton, 4, 0);
-        layout.add(vBox, 0, 0);
+        vBox.setSpacing(10);
+        vBox.setPadding(new Insets(20));
+        vBox.setBorder(new Border(new BorderStroke(Color.BLACK,
+                BorderStrokeStyle.SOLID, CornerRadii.EMPTY, BorderWidths.DEFAULT)));
+        vBox.getChildren().addAll(excelLabel, excelText, excelSelectButton, excelErrorLabel);
+        layout.add(vBox, 0, 0, 2, 1);
 
         layout.add(inputLable, 0, 1);
         layout.add(inputText, 1, 1, 2, 1);
@@ -156,5 +186,11 @@ public class TitleEntryClassifyMainWindow {
 
     private static boolean checkStringIsPath(String str) {
         return (str.indexOf("\\") > -1 && str.indexOf(".") < 0);
+    }
+
+    private static boolean checkExcelFile(String filePath) {
+        Pattern pattern = Pattern.compile(FileSettings.EXCEL_FORMAT);
+        Matcher matcher = pattern.matcher(filePath);
+        return matcher.find();
     }
 }

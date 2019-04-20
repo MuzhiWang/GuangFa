@@ -34,14 +34,10 @@ public class TitleEntryRevisedFilesWindow {
         grid.setPadding(new Insets(20, 20, 20, 20));
 
         ListView<Label> warnList = new ListView<>();
-        ListView<Label> uncertainList = new ListView<>();
 
         Label warnListLabel = new Label();
         warnListLabel.setText("Files need to be revised:");
         warnListLabel.setTextFill(Color.FIREBRICK);
-        Label uncertainListLabel = new Label();
-        uncertainListLabel.setText("Files name are not recognized:");
-        uncertainListLabel.setTextFill(Color.FIREBRICK);
 
 
         ObservableList<Label> observableList = FXCollections.observableArrayList();
@@ -60,10 +56,8 @@ public class TitleEntryRevisedFilesWindow {
         });
 
         grid.add(warnListLabel, 0, 0, 4, 1);
-        grid.add(warnList, 0, 1, 4, 4);
-        grid.add(uncertainListLabel, 0, 5, 4, 1);
-        grid.add(uncertainList, 0, 6, 4, 4);
-        grid.add(confirmButton, 0, 10, 4, 1);
+        grid.add(warnList, 0, 1, 4, 8);
+        grid.add(confirmButton, 0, 9, 4, 1);
 
         Scene scene = new Scene(grid, 640, 480);
         window.setScene(scene);
