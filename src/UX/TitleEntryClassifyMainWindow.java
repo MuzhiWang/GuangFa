@@ -6,9 +6,12 @@ import Core.TitleCollection;
 import Core.TitleEntryClassifier;
 import Settings.FileSettings;
 import Tools.Utils;
+import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
@@ -176,6 +179,10 @@ public class TitleEntryClassifyMainWindow {
         layout.add(startClassifyButton, 2, 5, 4, 2);
         layout.add(failedSelectLabel, 0, 7, 4, 1);
 
+        VBox pbVbox = new VBox();
+        createProgressBar(pbVbox);
+        layout.add(pbVbox, 2, 8);
+
         Scene scene = new Scene(layout, 640, 480);
         window.setScene(scene);
     }
@@ -192,5 +199,47 @@ public class TitleEntryClassifyMainWindow {
         Pattern pattern = Pattern.compile(FileSettings.EXCEL_FORMAT);
         Matcher matcher = pattern.matcher(filePath);
         return matcher.find();
+    }
+
+    static double ii = 0;
+    private static void createProgressBar(Pane pane) {
+        ii = 0;
+
+        // create a progressbar
+        ProgressBar pb = new ProgressBar();
+
+        // create a tile pane
+        TilePane r = new TilePane();
+
+        // creating button
+        Button b = new Button("Increase");
+
+        // action event
+        EventHandler<ActionEvent> event = new EventHandler<ActionEvent>() {
+            public void handle(ActionEvent e)
+            {
+                if (b.getText().equals("End")) {
+                    b.setText("Increase");
+                    ii = 0;
+                    pb.setProgress(ii);
+                    return;
+                }
+
+                if (ii >= 1) {
+                    b.setText("End");
+                    pb.setProgress(ProgressIndicator.INDETERMINATE_PROGRESS);
+                    return;
+                }
+
+                // set progress to different level of progressbar
+                ii += 0.05;
+                pb.setProgress(ii);
+            }
+        };
+
+        // set on action
+        b.setOnAction(event);
+
+        pane.getChildren().addAll(pb, b);
     }
 }
